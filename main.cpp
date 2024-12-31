@@ -111,6 +111,7 @@ private:
     createLogicalDevice();
     createSwapChain();
     createImageViews();
+    createGraphicsPipeline();
   }
 
   void mainLoop() {
@@ -384,6 +385,8 @@ private:
       }
     }
   }
+
+  void createGraphicsPipeline() {}
 
   VkPresentModeKHR chooseSwapPresentMode(
       const std::vector<VkPresentModeKHR> &availablePresentModes) {
