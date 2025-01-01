@@ -26,11 +26,10 @@
         stb
         tinyobjloader
         vk-bootstrap
-        vulkan-memory-allocator      
+        vulkan-memory-allocator
 
         libxkbcommon
         libGL
-        
 
         wayland
         wayland-protocols
@@ -88,8 +87,8 @@
         (writeShellApplication {
           name = "compile-shaders";
           text = ''
-            exec ${shaderc.bin}/bin/glslc shaders/simple_shader.vert -o shaders/simple_shader.vert.spv &
-            exec ${shaderc.bin}/bin/glslc shaders/simple_shader.frag -o shaders/simple_shader.frag.spv
+            exec ${shaderc.bin}/bin/glslc shaders/shader.vert -o shaders/shader.vert.spv &
+            exec ${shaderc.bin}/bin/glslc shaders/shader.frag -o shaders/shader.frag.spv
           '';
         })
       ];
