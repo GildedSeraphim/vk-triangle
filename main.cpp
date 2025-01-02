@@ -143,6 +143,8 @@ private:
 
   bool framebufferResized = false;
 
+  VkBuffer vertexBuffer;
+
   const std::vector<Vertex> vertices = {{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
                                         {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
                                         {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
@@ -176,6 +178,7 @@ private:
     createGraphicsPipeline();
     createFramebuffers();
     createCommandPool();
+    createVertexBuffer();
     createCommandBuffers();
     createSyncObjects();
   }
@@ -203,6 +206,8 @@ private:
 
   void cleanup() {
     cleanupSwapChain();
+
+    vkDestroyBuffer(device, vertexBuffer, nullptr);
 
     vkDestroyPipeline(device, graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
@@ -680,6 +685,19 @@ private:
     if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) !=
         VK_SUCCESS) {
       throw std::runtime_error("failed to create command pool!");
+    }
+  }
+
+  void createVertexBuffer() {
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) !=
+        VK_SUCCESS) {
+      throw std::runtime_error("failed to create vertex buffer");
     }
   }
 
