@@ -61,6 +61,8 @@
 
         glslviewer
 
+        stb
+
         raylib
         glfw
         shaderc
@@ -108,6 +110,7 @@
       VULKAN_SDK = "/home/sn/Vulkan/1.3.296.0/x86_64";
       XDG_DATA_DIRS = builtins.getEnv "XDG_DATA_DIRS";
       XDG_RUNTIME_DIR = "/run/user/1000";
+      STB_INCLUDE_PATH = "./headers/stb";
     };
   };
 }
