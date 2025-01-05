@@ -62,6 +62,7 @@
         glslviewer
 
         stb
+        tinyobjloader
 
         raylib
         glfw
