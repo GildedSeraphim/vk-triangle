@@ -1,117 +1,125 @@
 {
-  description = "Vulkan Dev Flake";
+  description = "Vulkan Flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
   };
-
   outputs = {
     self,
     nixpkgs,
-  } @ inputs: let
-    lib = nixpkgs.lib;
-    pkgs = import inputs.nixpkgs {
-      system = "x86_64-linux";
-    };
-  in {
-    devShells.x86_64-linux.default = pkgs.mkShell rec {
-      name = "Test Env";
-      nativeBuildInputs = with pkgs; [
-      ];
+    flake-utils,
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
+        lib = nixpkgs.lib;
+        pkgs = import nixpkgs {
+          system = "${system}";
+          config = {
+            allowUnfree = true;
+            nvidia.acceptLicense = true;
+          };
+        };
+      in rec {
+        devShells = {
+          default = pkgs.mkShell rec {
+            buildInputs = with pkgs; [
+              ##################
+              ### VULKAN SDK ###
+              vulkan-headers
+              vulkan-loader
+              vulkan-validation-layers
+              vulkan-tools
+              vulkan-tools-lunarg
+              vulkan-utility-libraries
+              vulkan-extension-layer
+              vulkan-volk
+              vulkan-validation-layers
+              spirv-headers
+              spirv-tools
+              spirv-cross
+              mesa
+              glslang
+              ##################
 
-      buildInputs = with pkgs; [
-        # Libraries
-        glm
-        imgui
-        stb
-        tinyobjloader
-        vk-bootstrap
-        vulkan-memory-allocator
+              ####################
+              ### Compat Tools ###
+              xorg.libX11
+              xorg.libXrandr
+              xorg.libXcursor
+              xorg.libXi
+              xorg.libXxf86vm
+              xorg.libXinerama
+              wayland
+              wayland-protocols
+              kdePackages.qtwayland
+              kdePackages.wayqt
+              ####################
 
-        libxkbcommon
-        libGL
+              #################
+              ### Libraries ###
+              glfw3
+              glfw
+              glm
+              vulkan-memory-allocator
+              vk-bootstrap
 
-        wayland
-        wayland-protocols
+              imgui
+              stb
+              tinyobjloader
 
-        libGLU
+              libGLU
+              libGL
+              libxkbcommon
 
-        SDL2
-        SDL2_ttf
+              SDL2
+              SDL2_ttf
 
-        boost
-        cmake
-        catch2
-        glm
-        gcc
-        kdePackages.qtwayland
-        kdePackages.wayqt
-        clang
+              pkg-config
 
-        pkg-config
+              boost
+              catch2
+              #################
 
-        xorg.libX11
-        xorg.libXrandr
-        xorg.libXcursor
-        xorg.libXi
-        xorg.libXxf86vm
-        xorg.libXinerama
+              #################
+              ### Compilers ###
+              shaderc
+              gcc
+              clang
+              #################
+            ];
 
-        cargo
+            packages = with pkgs; [
+              (writeShellApplication {
+                name = "compile-shaders";
+                text = ''
+                  exec ${shaderc.bin}/bin/glslc shader.vert -o vert.spv &
+                  exec ${shaderc.bin}/bin/glslc shader.frag -o frag.spv
+                '';
+              })
+              (writeShellApplication {
+                ## Lets renderdoc run on wayland using xwayland
+                name = "renderdoc";
+                text = "QT_QPA_PLATFORM=xcb qrenderdoc";
+              })
 
-        glslviewer
+              #############
+              ### Tools ###
+              renderdoc
+              cmake
+              glslviewer
+              #############
+            ];
 
-        stb
-        tinyobjloader
-
-        raylib
-        glfw
-        shaderc
-        shaderc.out
-        shaderc.bin
-        shaderc.lib
-        shaderc.dev
-        shaderc.static
-        glfw3
-        mesa
-        glslang
-        renderdoc
-        spirv-tools
-        vulkan-volk
-        vulkan-tools
-        vulkan-loader
-        vulkan-headers
-        vulkan-validation-layers
-        vulkan-tools-lunarg
-        vulkan-extension-layer
-      ];
-
-      packages = with pkgs; [
-        (writeShellApplication {
-          name = "compile-shaders";
-          text = ''
-            exec ${shaderc.bin}/bin/glslc shaders/shader.vert -o shaders/shader.vert.spv &
-            exec ${shaderc.bin}/bin/glslc shaders/shader.frag -o shaders/shader.frag.spv
-          '';
-        })
-      ];
-
-      shellHook = with pkgs; ''
-        echo "Welcome to my Vulkan Shell" | ${cowsay}/bin/cowsay | ${lolcat}/bin/lolcat
-        echo "vulkan loader: ${vulkan-loader}"
-        echo "vulkan headers: $vulkan-headers}"
-        echo "validation layer: ${vulkan-validation-layers}"
-        echo "tools: ${vulkan-tools}"
-        echo "tools-lunarg: ${vulkan-tools-lunarg}"
-        echo "extension-layer: ${vulkan-extension-layer}"
-      '';
-
-      LD_LIBRARY_PATH = "${lib.makeLibraryPath buildInputs}";
-      VK_LAYER_PATH = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
-      VULKAN_SDK = "/home/sn/Vulkan/1.3.296.0/x86_64";
-      XDG_DATA_DIRS = builtins.getEnv "XDG_DATA_DIRS";
-      XDG_RUNTIME_DIR = "/run/user/1000";
-      STB_INCLUDE_PATH = "./headers/stb";
-    };
-  };
+            LD_LIBRARY_PATH = "${lib.makeLibraryPath buildInputs}";
+            VK_LAYER_PATH = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
+            VULKAN_SDK = "${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d";
+            XDG_DATA_DIRS = builtins.getEnv "XDG_DATA_DIRS";
+            XDG_RUNTIME_DIR = "/run/user/1000";
+            STB_INCLUDE_PATH = "./headers/stb";
+            #VULKAN_SDK = "/home/sn/Vulkan/1.3.296.0/x86_64";
+          };
+        };
+      }
+    );
 }
