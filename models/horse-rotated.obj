@@ -1,6 +1,6 @@
 # Blender 4.3.2
 # www.blender.org
-mtllib horse.mtl
+mtllib horse-rotated.mtl
 o horse_horse_mat_0
 v 0.071410 -0.470432 -0.018528
 v 0.067419 -0.535217 -0.016625

@@ -31,8 +31,8 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-const std::string MODEL_PATH = "./models/horse.obj";
-const std::string TEXTURE_PATH = "./textures/5f03786d6e594e479aafeb7c97976ac0_RGB_horse.tga_0.png";
+const std::string MODEL_PATH = "./models/viking_room.obj";
+const std::string TEXTURE_PATH = "./textures/viking_room.png";
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
 const std::vector<const char *> validationLayers = {
